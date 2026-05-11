@@ -9,7 +9,12 @@ import {
   getEntryFile,
   resolveLocalGLTFResource,
 } from '../.tmp-tests/scene/gltf-file-resolver.js';
-import { getUnsupportedExternalResourceMessage, isDataUri } from '../.tmp-tests/scene/gltf-support.js';
+import { collectExternalGLTFDependencies } from '../.tmp-tests/scene/gltf-manifest.js';
+import {
+  getMissingLocalResourceMessage,
+  getUnsupportedExternalResourceMessage,
+  isDataUri,
+} from '../.tmp-tests/scene/gltf-support.js';
 
 test('skybox params uniform allocates the padded WebGPU buffer size', () => {
   assert.equal(SKYBOX_PARAMS_BUFFER_SIZE, 32);
@@ -58,4 +63,18 @@ test('gltf local file resolver matches referenced bin and texture files', () => 
   assert.equal(resolveLocalGLTFResource(fileIndex, entryFile, 'DamagedHelmet.bin')?.name, 'DamagedHelmet.bin');
   assert.equal(resolveLocalGLTFResource(fileIndex, entryFile, './textures/baseColor.png')?.name, 'textures/baseColor.png');
   assert.equal(resolveLocalGLTFResource(fileIndex, entryFile, 'missing.bin'), null);
+});
+
+test('gltf manifest lists external file dependencies and formats a useful missing-files message', () => {
+  const dependencies = collectExternalGLTFDependencies({
+    buffers: [{ uri: 'scene.bin' }],
+    images: [{ uri: 'textures/baseColor.png' }, { uri: 'data:image/png;base64,AAAA' }],
+  });
+
+  assert.deepEqual(dependencies.buffers, ['scene.bin']);
+  assert.deepEqual(dependencies.images, ['textures/baseColor.png']);
+  assert.match(
+    getMissingLocalResourceMessage('scene.gltf', ['scene.bin', 'textures/baseColor.png']),
+    /needs local dependency files selected together/,
+  );
 });

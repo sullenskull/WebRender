@@ -82,6 +82,7 @@ async function processModel(files: File[]) {
     return;
   }
   if (!renderer) { pendingModelFiles = files; return; }
+  console.info('[processModel] selected files:', files.map((currentFile) => currentFile.name));
   showStatus(`Chargement de ${entryFile.name}…`);
   try {
     const scene = await loadGLTF(renderer.gpu, entryFile, files);

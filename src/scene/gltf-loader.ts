@@ -1,5 +1,6 @@
+import { collectExternalGLTFDependencies } from './gltf-manifest.js';
 import type { GPUContext } from '../core/gpu.js';
-import { getUnsupportedExternalResourceMessage, isDataUri } from './gltf-support.js';
+import { getMissingLocalResourceMessage, getUnsupportedExternalResourceMessage, isDataUri } from './gltf-support.js';
 import { buildLocalFileIndex, resolveLocalGLTFResource } from './gltf-file-resolver.js';
 import { createBuffer } from '../core/gpu.js';
 import { mat4Create, mat4FromTRS, mat4Multiply, mat4Invert, mat4Transpose } from '../utils/math.js';
@@ -71,6 +72,13 @@ export async function loadGLTF(gpu: GPUContext, file: File, files: readonly File
     return parseGLB(gpu, buffer);
   } else {
     const json = JSON.parse(new TextDecoder().decode(buffer));
+    const dependencies = collectExternalGLTFDependencies(json);
+    const missing = [...dependencies.buffers, ...dependencies.images].filter((uri) => {
+      return !resolveLocalGLTFResource(fileIndex, file, uri);
+    });
+    if (missing.length > 0) {
+      throw new Error(getMissingLocalResourceMessage(file.name, missing));
+    }
     return parseGLTF(gpu, json, null, file.name, fileIndex, file);
   }
 }
