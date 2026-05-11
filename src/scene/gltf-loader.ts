@@ -238,7 +238,9 @@ async function parseGLTF(
         size: [bitmap.width, bitmap.height],
         format: 'rgba8unorm',
         usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-        mipLevelCount: Math.floor(Math.log2(Math.max(bitmap.width, bitmap.height))) + 1,
+        // We currently do not generate mip chains after upload, so keep imported textures
+        // to a single mip level to avoid sampling uninitialized mip data on some drivers.
+        mipLevelCount: 1,
       });
       device.queue.copyExternalImageToTexture({ source: bitmap }, { texture: tex }, [bitmap.width, bitmap.height]);
       // Generate mipmaps via compute (simplified: just mark as done)
