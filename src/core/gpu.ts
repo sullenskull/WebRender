@@ -1,5 +1,3 @@
-import { shouldRequestHighPerformanceAdapter } from './webgpu-config.js';
-
 export interface GPUContext {
   adapter: GPUAdapter;
   device: GPUDevice;
@@ -17,9 +15,7 @@ export async function initWebGPU(canvas: HTMLCanvasElement): Promise<GPUContext>
     );
   }
 
-  const adapter = shouldRequestHighPerformanceAdapter(navigator.userAgent)
-    ? await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' })
-    : await navigator.gpu.requestAdapter();
+  const adapter = await navigator.gpu.requestAdapter();
   if (!adapter) throw new Error('No suitable GPU adapter found.');
 
   const requiredFeatures: GPUFeatureName[] = [];

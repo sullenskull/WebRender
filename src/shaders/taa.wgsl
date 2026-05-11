@@ -18,6 +18,7 @@ fn vs_main(@builtin(vertex_index) idx: u32) -> @builtin(position) vec4f {
 @fragment
 fn fs_main(@builtin(position) frag_coord: vec4f) -> @location(0) vec4f {
   let dim = vec2f(textureDimensions(current_tex));
+  let dim_i = vec2i(textureDimensions(current_tex));
   let uv  = frag_coord.xy / dim;
 
   // Sample current pixel and 3x3 neighborhood for AABB clamping
@@ -28,7 +29,8 @@ fn fs_main(@builtin(position) frag_coord: vec4f) -> @location(0) vec4f {
 
   for (var dy = -1; dy <= 1; dy++) {
     for (var dx = -1; dx <= 1; dx++) {
-      let s = textureLoad(current_tex, tc + vec2i(dx, dy), 0).rgb;
+      let sample_tc = clamp(tc + vec2i(dx, dy), vec2i(0), dim_i - vec2i(1));
+      let s = textureLoad(current_tex, sample_tc, 0).rgb;
       let ycocg = rgb_to_ycocg(s);
       c_min = min(c_min, ycocg);
       c_max = max(c_max, ycocg);

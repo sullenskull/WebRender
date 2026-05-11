@@ -120,7 +120,7 @@ export class Renderer {
     this.camera = camera;
     this.commonCode = commonWGSL + '\n';
     this.settings = {
-      taa: true, ssr: true, ssao: true, contactShadows: true, bloom: false,
+      taa: false, ssr: true, ssao: true, contactShadows: true, bloom: false,
       skybox: true, exposure: 0, tonemapMode: 0, iblIntensity: 1,
       gamma: 2.2, saturation: 1, contrast: 1, vignette: 0,
       renderMode: 'realtime',
