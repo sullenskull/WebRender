@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.tmp-tests/
+
+*.log
+Thumbs.db
+.DS_Store
